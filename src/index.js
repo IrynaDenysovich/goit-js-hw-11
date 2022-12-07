@@ -46,22 +46,24 @@ function loadMore(){
   loadPhotos().then(smoothWindowScroll);
 }
 
-window.onscroll = () => {
+// Throttle ??
+window.onscroll = () => setTimeout(scrollInfinity, 1000);
+
+function scrollInfinity(){
   let scollHeight = window.innerHeight + window.scrollY;
   if (scollHeight >= document.body.offsetHeight) {
     if(buttonLoadMore.classList.contains(buttomLoadMoreVisibleClass)){
-      console.log("!!!window.onscroll");
       loadMore();
     }    
   }
-};
+}
 
 function smoothWindowScroll() {
   const { height: cardHeight } =
     gallery.firstElementChild.getBoundingClientRect();
 
   window.scrollBy({
-    top: cardHeight,
+    top: cardHeight * 2,
     behavior: 'smooth',
   });
 }
