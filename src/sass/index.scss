@@ -1,2 +1,63 @@
 @import './common';
 @import './example';
+
+.search-form{
+    text-align: center;
+    width: 100%;
+    position: fixed;
+    background-color:rgb(40, 40, 117);
+    padding: 5px;
+}
+
+.gallery{
+    padding-top: 40px;
+    margin-left: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.photo-card__img{
+    width: 300px;
+    height: 200px;
+    display: block;
+
+    box-shadow: 0px 1px 3px rgb(0 0 0 / 12%), 0px 1px 1px rgb(0 0 0 / 14%),
+    0px 2px 1px rgb(0 0 0 / 20%);
+}
+
+.photo-card__link {
+    text-decoration: none;
+    color: black;
+}
+
+.info{
+    display: flex;
+    justify-content: space-around;
+    gap: 10px;
+
+    border-radius: 0px 0px 4px 4px;
+    box-shadow: 0px 1px 3px rgb(0 0 0 / 12%), 0px 1px 1px rgb(0 0 0 / 14%),
+    0px 2px 1px rgb(0 0 0 / 20%);
+}
+
+.info-item{
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    font-size: 14px;
+}
+
+.load-more{
+    margin: 5px auto;
+    padding: 10px 20px;
+    background-color:rgb(40, 40, 117);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    display: none;
+}
+
+.load-more-visible{
+    display: block;
+}
