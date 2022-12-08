@@ -1,3 +1,4 @@
+import axios from 'axios';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
@@ -8,13 +9,12 @@ const totalEmptyMessage =
 const totalLastMessage =
   "We're sorry, but you've reached the end of search results.";
 
-const buttomLoadMoreVisibleClass = 'load-more-visible';
-
 const form = document.querySelector('form#search-form');
 const input = document.querySelector('[name="searchQuery"]');
 const gallery = document.querySelector('div.gallery');
-const buttonLoadMore = document.querySelector('button.load-more');
 
+let loadComplete = false;
+let timeoutIndex = null;
 let requestParams = {
   key: '31801640-92314b1461717efb7747c4e31',
   q: '',
@@ -27,11 +27,10 @@ let requestParams = {
 
 let lightbox = new SimpleLightbox('.gallery a');
 
-buttonLoadMore.addEventListener('click', loadMore);
 form.addEventListener('submit', event => {
   event.preventDefault();
-  
-  let inputValue = input.value;
+  let inputValue = input.value.trim();
+  loadComplete = false;
   if (inputValue.length > 0) {
     requestParams.q = input.value;
     requestParams.page = 1;
@@ -41,20 +40,21 @@ form.addEventListener('submit', event => {
 });
 
 function loadMore(){
-  buttonLoadMore.classList.remove(buttomLoadMoreVisibleClass);
-  requestParams.page += 1;
-  loadPhotos().then(smoothWindowScroll);
+  if(!loadComplete){
+    requestParams.page += 1;
+    loadPhotos().then(smoothWindowScroll);
+  }
 }
 
-// Throttle ??
-window.onscroll = () => setTimeout(scrollInfinity, 1000);
+window.onscroll = () => {
+  clearTimeout(timeoutIndex);
+  timeoutIndex = setTimeout(scrollInfinity, 200);
+}
 
 function scrollInfinity(){
-  let scollHeight = window.innerHeight + window.scrollY;
+  let scollHeight = window.innerHeight + window.scrollY + 20;
   if (scollHeight >= document.body.offsetHeight) {
-    if(buttonLoadMore.classList.contains(buttomLoadMoreVisibleClass)){
-      loadMore();
-    }    
+    loadMore();  
   }
 }
 
@@ -77,19 +77,13 @@ async function loadPhotos() {
   const request = 'https://pixabay.com/api/?' + urlParams.join('&');
   let data;
   try {
-    const response = await fetch(request);
-    data = await fetchResponseCallback(response);
+    const response = await axios(request);
+    data = response.data;
   } catch (error) {
     data = Notify.failure(error);
+    return;
   }
   return fetchJsonCallback(data);
-}
-
-function fetchResponseCallback(response) {
-  if (!response.ok) {
-    throw new Error(response.status);
-  }
-  return response.json();
 }
 
 function fetchJsonCallback(data) {
@@ -104,10 +98,8 @@ function fetchJsonCallback(data) {
 
   let currentItems = requestParams.page * requestParams.per_page;
   if (currentItems > data.totalHits) {
-    buttonLoadMore.classList.remove(buttomLoadMoreVisibleClass);
+    loadComplete = true;
     Notify.warning(totalLastMessage);
-  } else {
-    buttonLoadMore.classList.add(buttomLoadMoreVisibleClass);
   }
 
   const newArrayImages = data.hits.map(markupCallback);
