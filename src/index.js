@@ -13,7 +13,6 @@ const form = document.querySelector('form#search-form');
 const input = document.querySelector('[name="searchQuery"]');
 const gallery = document.querySelector('div.gallery');
 
-let loadComplete = false;
 let timeoutIndex = null;
 let requestParams = {
   key: '31801640-92314b1461717efb7747c4e31',
@@ -34,28 +33,26 @@ form.addEventListener('submit', event => {
   if (inputValue.length > 0) {
     requestParams.q = input.value;
     requestParams.page = 1;
+
     gallery.innerHTML = '';
+
     loadPhotos();
   }
 });
 
-function loadMore(){
-  if(!loadComplete){
-    requestParams.page += 1;
-    loadPhotos().then(smoothWindowScroll);
-  }
+function loadMore() {
+  requestParams.page += 1;
+  loadPhotos().then(smoothWindowScroll);
 }
 
-window.onscroll = () => {
+function infinityScrollCallback() {
   clearTimeout(timeoutIndex);
-  timeoutIndex = setTimeout(scrollInfinity, 200);
-}
-
-function scrollInfinity(){
-  let scollHeight = window.innerHeight + window.scrollY + 20;
-  if (scollHeight >= document.body.offsetHeight) {
-    loadMore();  
-  }
+  timeoutIndex = setTimeout(() => {
+    let scollHeight = window.innerHeight + window.scrollY + 20;
+    if (scollHeight >= document.body.offsetHeight) {
+      loadMore();
+    }
+  }, 200);
 }
 
 function smoothWindowScroll() {
@@ -73,7 +70,7 @@ async function loadPhotos() {
   for (let key in requestParams) {
     urlParams.push(`${key}=${requestParams[key]}`);
   }
-
+  removeEventListener('scroll', infinityScrollCallback);
   const request = 'https://pixabay.com/api/?' + urlParams.join('&');
   let data;
   try {
@@ -96,14 +93,15 @@ function fetchJsonCallback(data) {
     Notify.success(`Hooray! We found ${data.totalHits} images.`);
   }
 
-  let currentItems = requestParams.page * requestParams.per_page;
-  if (currentItems > data.totalHits) {
-    loadComplete = true;
-    Notify.warning(totalLastMessage);
-  }
-
   const newArrayImages = data.hits.map(markupCallback);
   gallery.insertAdjacentHTML('beforeend', newArrayImages.join(''));
+
+  let currentItems = requestParams.page * requestParams.per_page;
+  if (currentItems > data.totalHits) {
+    Notify.warning(totalLastMessage);
+  } else {
+    addEventListener('scroll', infinityScrollCallback);
+  }
 
   lightbox.refresh();
 }
