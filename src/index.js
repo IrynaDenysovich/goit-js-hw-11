@@ -29,7 +29,6 @@ let lightbox = new SimpleLightbox('.gallery a');
 form.addEventListener('submit', event => {
   event.preventDefault();
   let inputValue = input.value.trim();
-  loadComplete = false;
   if (inputValue.length > 0) {
     requestParams.q = input.value;
     requestParams.page = 1;
